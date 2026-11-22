@@ -1,24 +1,53 @@
 # BITAXE_AUTOTUNER
-An autotuner program with a web interface which keeps you BitAxe(s) in a given temp range, for e.g. minimum 64°C and maximum 66°C.
-When environment's temperature raises the program will lower the miner's clock, while during the night the speed will normally increase.
+An autotuner program with a web interface which keeps your BitAxe(s) in a given temp range, for e.g. minimum 64°C and maximum 66°C.
+When environment's temperature rises the program will lower the miner's clock, while during the night the speed will normally increase.
 
-<img width="1366" height="768" alt="immagine" src="https://github.com/user-attachments/assets/b9a16831-bc59-416e-bd3b-82914642f86d" />
-*The main screen*
+### Compatibility with other Bitaxe models
+Since this project relies on standard **AxeOS / ESP-Miner REST endpoints** (`GET /api/system/info` and `PATCH /api/system`), it is compatible out-of-the-box with **Bitaxe Ultra (BM1366), Supra (BM1368), Gamma (BM1370), GT, and Hex** models. 
 
-<img width="923" height="200" alt="immagine" src="https://github.com/user-attachments/assets/94c57b0a-807e-4f88-a5a2-5b999f415af3" />
-*The settings are simple and the tooltip contains a brief description of the logic*
+> **Note:** The default frequency/voltage ladder in the sketch is tuned for the **Bitaxe Gamma 601 (BM1370)**. If you use an Ultra, Supra, or Max model, make sure to adjust the `ladder[]` array values to match your specific ASIC's safe frequency and core voltage range.
 
-<img width="1363" height="338" alt="immagine" src="https://github.com/user-attachments/assets/c21c8cd8-fee3-4bc2-8bf2-1f4c16be5639" />
-*The device list with the enable/disable auto-tuning checkbox and the VCore voltage offset*
-
-<img width="1350" height="532" alt="immagine" src="https://github.com/user-attachments/assets/d4711361-0ac0-479e-86f3-059be55cf222" />
-*The voltage ladder, the maximum I reached with my cooling system is 1020MHz @1.335V*
-
-<img width="1355" height="360" alt="immagine" src="https://github.com/user-attachments/assets/cb56eadf-dd4c-43c7-8836-3b0b42c6af75" />
-*The time/NTP servers to synchronze the ESP's clock*
-
-<img width="1306" height="348" alt="immagine" src="https://github.com/user-attachments/assets/fbecbf1e-b212-4965-bac0-be8b3fc7ad6f" />
-*The log*
+INSTALLATION and TESTING
+-----------
+Simply flash the program on your ESP32 after setting your WiFi SSID and password in the code:
+```cpp
+const char *WIFI_SSID     = "YOUR_WIFI_HERE";
+const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD_HERE";
+```
+The program has been tested with the following configuration:
+  2x BitAxe Gamma 601
+  Meanwell LRS-100 5V 100W
+  ESP32 Wroom board powered with 5V (pins 5V and GND)
+  Arduino IDE v2.3.8
+  	Install Arduino JSON Library (open menu Sketch, Include Libraries, Manage Libraries
+  	and write ArduinoJSON. The result should show the version by Benoît Blanchon.
+  	Click install.
+  	Tested with v7.4.3, should work with versions 6.1+
+  
+<p>
+<img width="1366" height="768" alt="immagine" src="https://github.com/user-attachments/assets/b9a16831-bc59-416e-bd3b-82914642f86d" /><br>
+<em>The main screen</em>
+</p>
+<p>
+<img width="923" height="200" alt="immagine" src="https://github.com/user-attachments/assets/94c57b0a-807e-4f88-a5a2-5b999f415af3" /><br>
+<em>The settings are simple and the tooltips contain a brief description of the logic</em>
+</p>
+<p>
+<img width="1363" height="338" alt="immagine" src="https://github.com/user-attachments/assets/c21c8cd8-fee3-4bc2-8bf2-1f4c16be5639" /><br>
+<em>The device list with the enable/disable auto-tuning checkbox and the VCore voltage offset</em>
+</p>
+<p>
+<img width="1350" height="532" alt="immagine" src="https://github.com/user-attachments/assets/d4711361-0ac0-479e-86f3-059be55cf222" /><br>
+<em>The voltage ladder, the maximum I reached with my cooling system is 1020MHz @1.335V</em>
+</p>
+<p>
+<img width="1355" height="360" alt="immagine" src="https://github.com/user-attachments/assets/cb56eadf-dd4c-43c7-8836-3b0b42c6af75" /><br>
+<em>The time/NTP servers to synchronize the ESP's clock</em>
+</p>
+<p>
+<img width="1306" height="348" alt="immagine" src="https://github.com/user-attachments/assets/fbecbf1e-b212-4965-bac0-be8b3fc7ad6f" /><br>
+<em>The log</em>
+</p>
 
 # BITAXE AUTO-TUNER - COMPLETE FEATURE LIST
 
@@ -99,7 +128,7 @@ When environment's temperature raises the program will lower the miner's clock, 
 - MAX_VCORE_MV: fixed at 1350 (mV), NOT exposed in the UI or
   user-editable. A second, independent hard safety ceiling (separate
   from MAXIMUM_TEMP) that bounds the ACTUAL voltage ever sent to a
-  BitAxe. See section 14 (Voltage Offset) for how this is applied,
+  BitAxe. See section 13 (Voltage Offset) for how this is applied,
   since it constrains the combination of a ladder step's voltage AND
   the global voltage offset together, not either one in isolation.
 
@@ -113,7 +142,7 @@ When environment's temperature raises the program will lower the miner's clock, 
 - Devices are enabled/disabled via a simple config array at the top of
   the sketch. Name and IP address are seeded from that array on first
   boot, but are runtime-editable thereafter from the dashboard - see
-  section 15 (Edit BitAxe Name / IP).
+  section 14 (Edit BitAxe Name / IP).
 
 
 **6. PERSISTENT SETTINGS (STORED IN FLASH / NVS)**
@@ -124,7 +153,7 @@ When environment's temperature raises the program will lower the miner's clock, 
     * Minimum temperature
     * Post-recovery settle time (seconds)
     * Dashboard auto-refresh interval
-    * Voltage offset (mV) - see section 14
+    * Voltage offset (mV) - see section 13
 - All of the above are editable live from the web UI's Settings panel,
   with changes taking effect immediately (no reboot required).
 
@@ -135,9 +164,9 @@ When environment's temperature raises the program will lower the miner's clock, 
 - Each entry records: real timestamp (via NTP, see section 2), the
   action taken (INCREASE or DECREASE), and the before/after frequency
   and voltage. Voltage values logged are always the EFFECTIVE voltage
-  (ladder step + voltage offset, see section 14), matching what was
+  (ladder step + voltage offset, see section 13), matching what was
   actually sent to the BitAxe and what the dashboard displays.
-- A device's IP/name change (section 15) is also written to its
+- A device's IP/name change (section 14) is also written to its
   operation log as its own entry (action "IP CHANGED" / "NAME
   CHANGED"), so the history of a given slot stays traceable across
   reassignment to a different physical unit.
@@ -182,7 +211,7 @@ When environment's temperature raises the program will lower the miner's clock, 
       countdown of seconds remaining, during the (configurable) settle
       window.
 - Settings panel is a collapsible accordion, closed by default on every
-  page load (built with native HTML <details>/<summary>, no JavaScript
+  page load (built with native HTML `<details>` / `<summary>`, no JavaScript
   needed to expand or collapse it).
 - Tooltips: a small tappable "i" icon next to every settings field,
   explaining exactly what it does and how it interacts with the rest of
@@ -328,30 +357,12 @@ When environment's temperature raises the program will lower the miner's clock, 
   change - it remains a per-slot history. The change itself is written
   into that log as its own entry so the history stays traceable across
   reassignment.
-- Editing only the name (IP unchanged) does NOT reset ladder/cooldown/
-  settle state, since the physical device targeted hasn't changed.
+- Editing only the name (IP unchanged) does NOT reset ladder/cooldown/settle state, since the physical device targeted hasn't changed.
 
+# **COPYRIGHT & LINKS**
 
-**15. TESTING**
------------
-Simply flash the program on your ESP32 after setting your WiFi SSID and password in the code:
-
-const char *WIFI_SSID     = "YOUR_WIFI_HERE";
-const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD_HERE";
-
-The program has been tested with the following configuration:
-  2x BitAxe Gamma 601
-  Meanwell LRS-100 5V 100W
-  ESP32 Wroom board powered with 5V (pins 5V and GND)
-  Arduino IDE v2.3.8
-  	Install Arduino JSON Library (open menu Sketch, Include Libraries, Manage Libraries
-  	and write ArduinoJSON. The result should show the version by Benoît Blanchon.
-  	Click install.
-  	Tested with v7.4.3, should work with versions 6.1+
-
-**COPYRIGHT**
-=========   
- *     Author:         Julian E. Spina
- *     Social/contact: jes@acca3.it
- *     Version:        1.0.0 (17 Aug 2026)
- *     License:        MIT
+* **Author:** [Julian E. Spina](https://www.acca3.it)
+* **Electronics & IoT Blog:** [electronic.acca3.it](https://electronic.acca3.it)
+* **Cybersecurity Platform:** [Flying Gecko Cybersecurity](https://www.cybersec3.com)
+* **LinkedIn:** [https://www.linkedin.com/in/julianspina](https://www.linkedin.com/in/julianspina/)
+* **Contact:** jes@acca3.it | **Version:** 1.0.0 | **License:** MIT
